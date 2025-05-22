@@ -1,0 +1,17 @@
+package components
+
+templ Navbar(isAuthenticated bool) {
+<nav style="position: fixed; top: 0; width: 100%; background-color: #333; height: 60px; z-index: 1000;">
+  <ul style="display: flex; justify-content: center; align-items: center; list-style-type: none; margin: 0; padding: 0; height: 100%;">
+    <li style="margin: 0 20px;"><a href="/" style="color: white; text-decoration: none;">Home</a></li>
+    if isAuthenticated {
+      <li style="margin: 0 20px;"><a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a></li>
+      <li style="margin: 0 20px;"><a href="/chat" style="color: white; text-decoration: none;">Chat</a></li>
+    } else {
+      <li style="margin: 0 20px;"><a href="/login" style="color: white; text-decoration: none;">Login</a></li>
+      <li style="margin: 0 20px;"><a href="/register" style="color: white; text-decoration: none;">Register</a></li>
+    }
+  </ul>
+</nav>
+}
+

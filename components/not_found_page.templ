@@ -1,0 +1,46 @@
+package components
+
+templ NotFoundPage() {
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>404 - Page Not Found</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f8f8f8;
+    }
+    .error-box {
+      text-align: center;
+    }
+    .error-box h1 {
+      font-size: 48px;
+      color: #333;
+    }
+    .error-box p {
+      font-size: 18px;
+      color: #666;
+    }
+    .error-box a {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #007BFF;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-box">
+    <h1>404</h1>
+    <p>Oops! The page you’re looking for doesn’t exist.</p>
+    <a href="/">Back to Home</a>
+  </div>
+</body>
+</html>
+}
+

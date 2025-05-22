@@ -1,0 +1,15 @@
+# Environment
+.env
+
+# Ignore Templ generated Go code
+*_templ.go
+
+# Go build output
+/bin/
+/build/
+/dist/
+*.exe
+*.out
+*.test
+
+

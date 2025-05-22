@@ -1,0 +1,10 @@
+package components
+
+templ RegisterForm() {
+<form action="/register" method="POST">
+  <input name="username" type="text" placeholder="Username" required />
+  <input name="pw" type="password" placeholder="Password" required />
+  <input name="confirm_pw" type="password" placeholder="Confirm Password" required />
+  <button type="submit">Register</button>
+</form>
+}
