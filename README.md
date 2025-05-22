@@ -9,8 +9,8 @@ a secure, end-to-end encrypted communication protocol with full authentication a
 ### 1. clone the repository
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git https://github.com/bok1c4/E2E-Decentralized-Communication-Protocol.git
+cd into
 ```
 
 ### 2. set up environment variables
