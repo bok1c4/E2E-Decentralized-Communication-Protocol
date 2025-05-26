@@ -6,7 +6,6 @@ import (
 	"auth/db/repositories"
 	"auth/services"
 	"auth/session"
-	"log"
 	"net/http"
 	"time"
 
@@ -24,12 +23,10 @@ func ServeChatPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := components.Base("/chat", isAuthenticated, components.ChatPage(user))
-	// log.Println("Route has been hit") - it is printing
 	templ.Handler(page).ServeHTTP(w, r)
 }
 
 func HandleGetMessages(w http.ResponseWriter, r *http.Request) {
-	log.Println("Route has been hit")
 	msgs, err := repositories.GetRecentMessages()
 	if err != nil {
 		http.Error(w, "Failed to load messages", http.StatusInternalServerError)
@@ -40,7 +37,6 @@ func HandleGetMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleSendMessage(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Route has been hit")
 	currentUser, _ := session.GetSessionValue(r, "username")
 
 	username, ok := currentUser.(string)
@@ -49,8 +45,6 @@ func HandleSendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("I should get username: %s", username)
-
 	user, err := repositories.FindUserByUsername(username)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusNotFound)
@@ -58,8 +52,6 @@ func HandleSendMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	content := r.FormValue("content")
-
-	log.Printf("I should get content: %s", content)
 
 	err = services.CreateMessage(int(user.ID), content)
 	if err != nil {
