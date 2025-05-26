@@ -20,6 +20,10 @@ func Setup(r chi.Router) {
 		r.Get("/dashboard", handlers.HandleDashboard)
 		r.Get("/getpgp", handlers.ServeGenPGP)
 		r.Post("/getpgp", handlers.HandleGenPGP)
+		// TODO: protect chat route if the user has no public key
+		r.Get("/chat", handlers.ServeChatPage)
+		r.Get("/chat/messages", handlers.HandleGetMessages)
+		r.Post("/chat/send", handlers.HandleSendMessage)
 		r.Get("/logout", handlers.HandleLogout)
 	})
 

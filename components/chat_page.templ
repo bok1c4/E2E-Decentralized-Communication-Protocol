@@ -1,0 +1,15 @@
+package components
+
+templ ChatPage(username string) {
+    <div>
+        <h1>#general</h1>
+        <form hx-post="/chat/send" hx-target="#messages" hx-swap="beforeend">
+            <textarea name="content" placeholder="Type a message..."></textarea>
+            <button type="submit">Send</button>
+        </form>
+        <div id="messages" hx-get="/chat/messages" hx-trigger="load, every 3s" hx-swap="innerHTML">
+            Loading messages...
+        </div>
+    </div>
+}
+

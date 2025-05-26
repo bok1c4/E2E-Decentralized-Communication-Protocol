@@ -17,3 +17,9 @@ Example of chat component: <https://v0.dev/chat/decentralized-chat-platform-M8TW
 You are the only one with access to your private key.
 If you lose your key or forget your passphrase, your messages cannot be recovered.
 This is a privacy feature — not even we can help you regain access
+
+Building Chat functionality:
+
+Show all of the users in the general channel
+Implement sending messages to the server and storing
+them in database.
