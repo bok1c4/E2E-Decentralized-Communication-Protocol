@@ -23,3 +23,6 @@ Building Chat functionality:
 Show all of the users in the general channel
 Implement sending messages to the server and storing
 them in database.
+
+<http://securityheaders.com/>
+<https://developer.mozilla.org/en-US/observatory>

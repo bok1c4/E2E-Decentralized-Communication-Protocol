@@ -1,0 +1,13 @@
+package components
+
+import "auth/db/models"
+
+
+templ UserList(users []models.User) {
+    <ul>
+        for _, user := range users {
+            <li>{user.Username}</li>
+        }
+    </ul>
+}
+

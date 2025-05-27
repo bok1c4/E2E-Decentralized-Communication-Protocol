@@ -23,6 +23,7 @@ func Setup(r chi.Router) {
 		// TODO: protect chat route if the user has no public key
 		r.Get("/chat", handlers.ServeChatPage)
 		r.Get("/chat/messages", handlers.HandleGetMessages)
+		r.Get("/online-users", handlers.HandleOnlineUsers)
 		r.Post("/chat/send", handlers.HandleSendMessage)
 		r.Get("/logout", handlers.HandleLogout)
 	})

@@ -31,6 +31,12 @@ func InsertUser(username, password string) error {
 	return db.DB.Create(&user).Error
 }
 
+func GetUsernames() ([]models.User, error) {
+	var users []models.User
+	err := db.DB.Find(&users).Error
+	return users, err
+}
+
 func FindUserByUsername(username string) (models.User, error) {
 	var user models.User
 	err := db.DB.Where("username = ?", username).First(&user).Error
