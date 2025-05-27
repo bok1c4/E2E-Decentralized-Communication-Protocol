@@ -1,0 +1,21 @@
+package components
+
+templ DM(currentUsername string, targetUsername string) {
+    <div>
+        <h1>Chat with {(targetUsername)}</h1>
+
+        <div id="user-list" hx-get="/online-users" hx-trigger="load, every 10s" hx-swap="innerHTML">
+            Loading users...
+        </div>        
+
+        <form action={templ.SafeURL("/chat/send/" + targetUsername)} method="POST" hx-post={"/chat/send/" + targetUsername} hx-target="#messages" hx-swap="beforeend">
+            <textarea name="content" placeholder="Type a message..." required></textarea>
+            <button type="submit">Send</button>
+        </form>
+
+        <div id="messages" hx-get={"/chat/messages/" + targetUsername} hx-trigger="load, every 2s" hx-swap="innerHTML">
+            Loading messages...
+        </div>
+    </div>
+}
+

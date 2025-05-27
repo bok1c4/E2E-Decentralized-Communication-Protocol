@@ -7,12 +7,15 @@ import (
 	"auth/services"
 	"auth/session"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/a-h/templ"
 )
 
-func ServeChatPage(w http.ResponseWriter, r *http.Request) {
+// IRC
+func ServeIRC(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated := session.IsAuthenticated(r)
 	currentUser, _ := session.GetSessionValue(r, "username")
 
@@ -23,6 +26,43 @@ func ServeChatPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := components.Base("/chat", isAuthenticated, components.ChatPage(user))
+	templ.Handler(page).ServeHTTP(w, r)
+}
+
+// Direct Messages
+func ServeDM(w http.ResponseWriter, r *http.Request) {
+	isAuthenticated := session.IsAuthenticated(r)
+	currentUserVal, _ := session.GetSessionValue(r, "username")
+
+	currentUsername, ok := currentUserVal.(string)
+	if !ok {
+		http.Error(w, "Invalid session data", http.StatusInternalServerError)
+		return
+	}
+
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 3 || parts[2] == "" {
+		http.NotFound(w, r)
+		return
+	}
+	targetUsername := parts[2]
+
+	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(targetUsername) {
+		http.Error(w, "Invalid username", http.StatusBadRequest)
+		return
+	}
+
+	_, err := repositories.FindUserByUsername(targetUsername)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	page := components.Base(
+		"/chat/"+targetUsername,
+		isAuthenticated,
+		components.DM(currentUsername, targetUsername),
+	)
 	templ.Handler(page).ServeHTTP(w, r)
 }
 

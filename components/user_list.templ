@@ -6,7 +6,11 @@ import "auth/db/models"
 templ UserList(users []models.User) {
     <ul>
         for _, user := range users {
-            <li>{user.Username}</li>
+            <li>
+              <a href={templ.SafeURL("/chat/" + user.Username)}>
+                {user.Username}
+              </a>
+            </li>
         }
     </ul>
 }

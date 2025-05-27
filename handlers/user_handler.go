@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// this should actually display online users not all of the users
+// TODO: this should actually display online users not all of the users
 func HandleOnlineUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := repositories.GetUsernames()
 	if err != nil {
