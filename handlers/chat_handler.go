@@ -7,67 +7,61 @@ import (
 	"auth/services"
 	"auth/session"
 	"net/http"
-	"regexp"
-	"strings"
+	"strconv"
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/go-chi/chi/v5"
 )
 
-// IRC
-func ServeIRC(w http.ResponseWriter, r *http.Request) {
+func ServeCommunication(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated := session.IsAuthenticated(r)
 	currentUser, _ := session.GetSessionValue(r, "username")
 
-	user, ok := currentUser.(string)
+	_, ok := currentUser.(string)
 	if !ok {
 		http.Error(w, "Invalid session data", http.StatusInternalServerError)
 		return
 	}
 
-	page := components.Base("/chat", isAuthenticated, components.ChatPage(user))
-	templ.Handler(page).ServeHTTP(w, r)
-}
-
-// Direct Messages
-func ServeDM(w http.ResponseWriter, r *http.Request) {
-	isAuthenticated := session.IsAuthenticated(r)
-	currentUserVal, _ := session.GetSessionValue(r, "username")
-
-	currentUsername, ok := currentUserVal.(string)
-	if !ok {
-		http.Error(w, "Invalid session data", http.StatusInternalServerError)
-		return
-	}
-
-	parts := strings.Split(r.URL.Path, "/")
-	if len(parts) < 3 || parts[2] == "" {
-		http.NotFound(w, r)
-		return
-	}
-	targetUsername := parts[2]
-
-	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(targetUsername) {
-		http.Error(w, "Invalid username", http.StatusBadRequest)
-		return
-	}
-
-	_, err := repositories.FindUserByUsername(targetUsername)
+	channelIDStr := chi.URLParam(r, "channel_id")
+	channelID, err := strconv.Atoi(channelIDStr)
 	if err != nil {
-		http.NotFound(w, r)
+		http.Error(w, "Invalid channel ID", http.StatusBadRequest)
 		return
 	}
 
 	page := components.Base(
-		"/chat/"+targetUsername,
+		"/chat",
 		isAuthenticated,
-		components.DM(currentUsername, targetUsername),
+		components.Communication(uint(channelID)),
 	)
 	templ.Handler(page).ServeHTTP(w, r)
 }
 
+func ServeChannelExplore(w http.ResponseWriter, r *http.Request) {
+	isAuthenticated := session.IsAuthenticated(r)
+	currentUser, _ := session.GetSessionValue(r, "username")
+
+	username, ok := currentUser.(string)
+	if !ok {
+		http.Error(w, "Invalid session data", http.StatusInternalServerError)
+		return
+	}
+
+	page := components.Base("/channels/explore", isAuthenticated, components.ChatPage(username))
+	templ.Handler(page).ServeHTTP(w, r)
+}
+
 func HandleGetMessages(w http.ResponseWriter, r *http.Request) {
-	msgs, err := repositories.GetRecentMessages()
+	channelIDStr := chi.URLParam(r, "channel_id")
+	channelID, err := strconv.Atoi(channelIDStr)
+	if err != nil {
+		http.Error(w, "Invalid channel ID", http.StatusBadRequest)
+		return
+	}
+
+	msgs, err := repositories.GetMessagesFromChannelID(uint(channelID))
 	if err != nil {
 		http.Error(w, "Failed to load messages", http.StatusInternalServerError)
 		return
@@ -77,8 +71,14 @@ func HandleGetMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleSendMessage(w http.ResponseWriter, r *http.Request) {
-	currentUser, _ := session.GetSessionValue(r, "username")
+	channelIDStr := chi.URLParam(r, "channel_id")
+	channelID, err := strconv.Atoi(channelIDStr)
+	if err != nil {
+		http.Error(w, "Invalid channel ID", http.StatusBadRequest)
+		return
+	}
 
+	currentUser, _ := session.GetSessionValue(r, "username")
 	username, ok := currentUser.(string)
 	if !ok {
 		http.Error(w, "Invalid session data", http.StatusInternalServerError)
@@ -92,8 +92,7 @@ func HandleSendMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	content := r.FormValue("content")
-
-	err = services.CreateMessage(int(user.ID), content)
+	err = services.CreateMessage(int(user.ID), int(channelID), content)
 	if err != nil {
 		http.Error(w, "Creating new Message has failed", http.StatusInternalServerError)
 		return

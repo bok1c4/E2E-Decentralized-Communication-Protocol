@@ -1,20 +1,22 @@
 package models
 
-import (
-	"time"
-)
+import "time"
 
 type Message struct {
-	ID        int       `gorm:"primaryKey" json:"id"`
-	UserID    int       `gorm:"not null" json:"user_id"`
-	User      User      `gorm:"foreignKey:UserID" json:"user"` // Auto-preload user info if needed
-	Content   string    `gorm:"not null" json:"content"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	ID       uint `gorm:"primaryKey"`
+	SenderID uint `gorm:"not null"`
+	Sender   User `gorm:"foreignKey:SenderID"`
+
+	ChannelID uint    `gorm:"not null"` // Always present
+	Channel   Channel `gorm:"foreignKey:ChannelID"`
+
+	Content   string `gorm:"not null"`
+	CreatedAt time.Time
 }
 
 type MessageWithUser struct {
-	ID        int
-	Username  string
-	Content   string
-	CreatedAt time.Time
+	ID        uint      `json:"id"`
+	Content   string    `json:"content"`
+	Username  string    `json:"username"`
+	CreatedAt time.Time `json:"created_at"`
 }

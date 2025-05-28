@@ -1,0 +1,31 @@
+package components
+
+import (
+  "auth/db/models" 
+  "fmt"
+)
+
+templ OpenChannelsList(channels []models.Channel, currentUserID uint) {
+    <ul>
+        for _, channel := range channels {
+            <li>
+                <a href={templ.SafeURL("/channel/" + fmt.Sprint(channel.ID))}>
+                    if channel.IsDirect {
+                        for _, user := range channel.Users {
+                            if user.ID != currentUserID {
+                                {user.Username}
+                            }
+                        }
+                    } else {
+                        if channel.Name != nil {
+                            {*channel.Name}
+                        } else {
+                            {"Unnamed"}
+                        }
+                    }
+                </a>
+            </li>
+        }
+    </ul>
+}
+

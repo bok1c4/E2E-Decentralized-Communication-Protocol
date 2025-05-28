@@ -20,13 +20,23 @@ func Setup(r chi.Router) {
 		r.Get("/dashboard", handlers.HandleDashboard)
 		r.Get("/getpgp", handlers.ServeGenPGP)
 		r.Post("/getpgp", handlers.HandleGenPGP)
-		r.Get("/chat", handlers.ServeIRC)
 
-		r.Get("/chat/{username}", handlers.ServeDM)
+		// channels
+		r.Get("/channels", handlers.GetOpenChannels)
+		r.Get("/channels/explore", handlers.ServeChannelExplore)
 
-		r.Get("/chat/messages", handlers.HandleGetMessages)
+		r.Get("/channel/{channel_id}/messages", handlers.HandleGetMessages)
+		r.Post("/channel/{channel_id}/send", handlers.HandleSendMessage)
+
+		r.Get("/channel/{channel_id}", handlers.ServeCommunication)
+
+		// retrieve messages based on channel_id
+		// send messages based on channel_id
+		// that means we need seperate route for channel
+		// (unique route (component))
+
+		// utils
 		r.Get("/online-users", handlers.HandleOnlineUsers)
-		r.Post("/chat/send", handlers.HandleSendMessage)
 		r.Get("/logout", handlers.HandleLogout)
 	})
 

@@ -6,7 +6,7 @@ templ Navbar(isAuthenticated bool) {
     <li style="margin: 0 20px;"><a href="/" style="color: white; text-decoration: none;">Home</a></li>
     if isAuthenticated {
       <li style="margin: 0 20px;"><a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a></li>
-      <li style="margin: 0 20px;"><a href="/chat" style="color: white; text-decoration: none;">Chat</a></li>
+      <li style="margin: 0 20px;"><a href="/channels/explore" style="color: white; text-decoration: none;">Chat</a></li>
     } else {
       <li style="margin: 0 20px;"><a href="/login" style="color: white; text-decoration: none;">Login</a></li>
       <li style="margin: 0 20px;"><a href="/register" style="color: white; text-decoration: none;">Register</a></li>

@@ -1,21 +1,13 @@
 package components
-
 templ ChatPage(currentUser string) {
     <div>
-        <h1>#general</h1>
+        <div id="channel-list" hx-get="/channels" hx-trigger="load, every 10s" hx-swap="innerHTML">
+            Loading Channels...
+        </div>        
 
         <div id="user-list" hx-get="/online-users" hx-trigger="load, every 10s" hx-swap="innerHTML">
             Loading users...
         </div>        
-
-        <form action="/chat/send" method="POST" hx-post="/chat/send" hx-target="#messages" hx-swap="beforeend">
-            <textarea name="content" placeholder="Type a message..." required></textarea>
-            <button type="submit">Send</button>
-        </form>
-
-        <div id="messages" hx-get="/chat/messages" hx-trigger="load, every 2s" hx-swap="innerHTML">
-            Loading messages...
-        </div>
     </div>
 }
 

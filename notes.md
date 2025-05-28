@@ -34,3 +34,12 @@ Creating a group chat with encryption
 Messages should have row sent to, and that can be channel_id or user_id.
 
 First I should list channels and for user to pick which channel he wants to send the messages
+
+CHAT PAGE DATA needs to show online users, show channels.
+And when users click on the channel to redirect them to the
+SERVE_CHAT_PAGE (which handles both DIRECT and NON-DIRECT CHANNELS)
+
+I am going to create the channel when user clicks on the user, but later, the channel should only be created if the user sends the message
+
+For later, maybe have support route like /chat/{username} and then when the channel is created just to redirect to the channel page
+and if two users have the channel our application should avoid /chat/{username} route
