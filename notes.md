@@ -9,8 +9,6 @@ TODO:
 
 DOCKER: I can try to host the application on onion and try to test the application
 
-give me a component that allows user to have decentralized communication channel with E2E encryption, there can be later servers-like or more like group chats and basically channels like IRC and forums for user to discuss anything. Also of course there should be Direct Messages between the users
-
 Example of chat component: <https://v0.dev/chat/decentralized-chat-platform-M8TWUSTLj6A>
 
 ⚠️ Important:
@@ -26,3 +24,13 @@ them in database.
 
 <http://securityheaders.com/>
 <https://developer.mozilla.org/en-US/observatory>
+
+Next steps:
+
+Adding private key decryption of messages
+Saving messages and retrieving messages from database (between users)
+Creating a group chat with encryption
+
+Messages should have row sent to, and that can be channel_id or user_id.
+
+First I should list channels and for user to pick which channel he wants to send the messages

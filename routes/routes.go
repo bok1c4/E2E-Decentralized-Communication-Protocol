@@ -21,14 +21,8 @@ func Setup(r chi.Router) {
 		r.Get("/getpgp", handlers.ServeGenPGP)
 		r.Post("/getpgp", handlers.HandleGenPGP)
 		r.Get("/chat", handlers.ServeIRC)
-		r.Get("/chat/{username}", handlers.ServeDM)
 
-		// TODO:
-		// route for private messages
-		// /chat/users_username, we need to protect this route
-		// with validating if the user is in the database
-		// (but we need safe operations attackers might try to
-		// inject sql query)
+		r.Get("/chat/{username}", handlers.ServeDM)
 
 		r.Get("/chat/messages", handlers.HandleGetMessages)
 		r.Get("/online-users", handlers.HandleOnlineUsers)
