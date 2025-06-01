@@ -30,10 +30,9 @@ func Setup(r chi.Router) {
 
 		r.Get("/channel/{channel_id}", handlers.ServeCommunication)
 
-		// retrieve messages based on channel_id
-		// send messages based on channel_id
-		// that means we need seperate route for channel
-		// (unique route (component))
+		// support route when two users don't have channels
+		r.Get("/chat/{username}", handlers.ServeStartCommunication)
+		r.Post("/chat/init/{username}", handlers.HandleChatInitSend)
 
 		// utils
 		r.Get("/online-users", handlers.HandleOnlineUsers)

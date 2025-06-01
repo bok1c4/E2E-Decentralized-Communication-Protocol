@@ -11,7 +11,6 @@ type Channel struct {
 	Users     []*User   `gorm:"many2many:channel_users"`
 	Messages  []Message `gorm:"foreignKey:ChannelID"`
 	CreatedAt time.Time
-	UpdatedAt time.Time
 }
 
 type ChannelUser struct {

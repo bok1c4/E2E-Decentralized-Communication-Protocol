@@ -1,0 +1,21 @@
+package components
+
+templ StartConvo(targetUsername string) {
+    <div>
+        <form 
+            action={templ.SafeURL("/chat/init/" + targetUsername)}
+            method="POST"
+            hx-post={templ.SafeURL("/chat/init/" + targetUsername)}
+            hx-target="this"         
+            hx-swap="none"           
+        >
+            <textarea name="content" placeholder="Type a message..." required></textarea>
+            <button type="submit">Send</button>
+        </form>
+
+        <div id="messages">
+            Start the conversation...
+        </div>
+    </div>
+}
+

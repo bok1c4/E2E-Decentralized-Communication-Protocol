@@ -5,7 +5,6 @@ import (
 	"auth/db/models"
 )
 
-// sender_id, channel_id, msg
 func InsertChannelMsg(user_id int, channel_id int, message string) error {
 	msg := models.Message{
 		SenderID:  uint(user_id),

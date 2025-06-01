@@ -8,7 +8,6 @@ import (
 	"net/http"
 )
 
-// TODO: Get No Direct Channels
 func GetOpenChannels(w http.ResponseWriter, r *http.Request) {
 	currentUser, _ := session.GetSessionValue(r, "username")
 
