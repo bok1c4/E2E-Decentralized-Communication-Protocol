@@ -1,113 +1,205 @@
 package components
 
 templ Dashboard(username string, pgpKey string) {
-  <div class="container">
-    <h2>👋 Welcome, {username}!</h2>
-    <p>You are now logged in to your dashboard.</p>
+  <html>
+    <head>
+      <script src="https://unpkg.com/openpgp@5.10.1/dist/openpgp.min.js"></script>
+    </head>
+    <body>
+      <div class="container">
+        <h2>👋 Welcome, {username}!</h2>
+        <p>You are now logged in to your dashboard.</p>
 
-    if pgpKey == "" {
-      <div class="info">
-        <h3>Why Use PGP?</h3>
-        <p>
-          PGP (Pretty Good Privacy) is a method for secure, encrypted communication.
-          To use PGP with our platform, we recommend downloading
-          <a href="https://apps.kde.org/kleopatra/" target="_blank">Kleopatra PGP Manager</a>.
-        </p>
+        if pgpKey == "" {
+          <div class="info">
+            <h3>Why Use PGP?</h3>
+            <p>
+              PGP (Pretty Good Privacy) is a method for secure, encrypted communication.
+              To use PGP with our platform, we recommend downloading
+              <a href="https://apps.kde.org/kleopatra/" target="_blank">Kleopatra PGP Manager</a>.
+            </p>
 
-        <h4>Recommended Key Algorithms:</h4>
-        <ul>
-          <li><strong>ECC (Curve25519 or secp256k1):</strong> More efficient and secure. Preferred option.</li>
-          <li><strong>RSA 4096 or RSA 3072:</strong> For those who prefer RSA encryption.</li>
-        </ul>
+            <h4>Recommended Key Algorithms:</h4>
+            <ul>
+              <li><strong>ECC (Curve25519 or secp256k1):</strong> More efficient and secure. Preferred option.</li>
+              <li><strong>RSA 4096 or RSA 3072:</strong> For those who prefer RSA encryption.</li>
+            </ul>
+          </div>
+
+          <div class="button-group">
+            <a href="/getpgp" class="button">🔑 Generate PGP Key</a>
+            <a href="/logout" class="button logout">🔓 Logout</a>
+          </div>
+        } else {
+          <div class="pgp-container">
+            <h3>Your PGP Public Key:</h3>
+            <textarea readonly>{pgpKey}</textarea>
+
+            <h3>🔐 Load Your Private Key for Decryption</h3>
+            <input type="file" id="privateKeyFile" accept=".asc" />
+            <input type="password" id="passphrase" placeholder="Enter passphrase" />
+            <button onclick="handleKeyUpload()">Decrypt & Store</button>
+
+            <p id="key-status">⚠️ No private key loaded.</p>
+
+            <h3>🔓 Test Decryption</h3>
+            <textarea id="pgpMessage" placeholder="Paste encrypted PGP message here"></textarea><br />
+            <button onclick="decryptMessage(document.getElementById('pgpMessage').value)">
+              🔓 Decrypt
+            </button>
+          </div>
+
+          <div class="button-group">
+            <a href="/logout" class="button logout">🔓 Logout</a>
+          </div>
+        }
       </div>
 
-      <div class="button-group">
-        <a href="/getpgp" class="button">
-          🔑 Generate PGP Key
-        </a>
-        <a href="/logout" class="button logout">🔓 Logout</a>
-      </div>
+      <script>
+        let encryptedPrivateKey = null;
+        let localAESKey = null;
+        let keyTimeout = null;
 
-      <div id="pgp-key-container"></div>
-    } else {
-      <div class="pgp-container">
-        <h3>Your PGP Public Key:</h3>
-        <textarea readonly>{pgpKey}</textarea>
-      </div>
+        async function handleKeyUpload() {
+          const file = document.getElementById("privateKeyFile").files[0];
+          const passphrase = document.getElementById("passphrase").value;
+          const status = document.getElementById("key-status");
 
-      <div class="button-group">
-        <a href="/logout" class="button logout">🔓 Logout</a>
-      </div>
-    }
-  </div>
+          if (!file || !passphrase) {
+            alert("Please provide both private key file and passphrase.");
+            return;
+          }
 
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      margin: 0;
-    }
-    .container {
-      text-align: center;
-      background-color: white;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      max-width: 800px;
-    }
-    .info {
-      background-color: #eef7ff;
-      padding: 20px;
-      border-left: 4px solid #007bff;
-      margin-bottom: 20px;
-      text-align: left;
-    }
-    .pgp-info {
-      background-color: #f5f5f5;
-      color: #333;
-      padding: 10px;
-      border-radius: 5px;
-      margin-top: 10px;
-      font-size: 14px;
-      white-space: pre-wrap;
-      line-height: 1.6;
-      overflow-x: auto;
-    }
-    .button-group {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-    .button {
-      padding: 10px 20px;
-      border: none;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .button.logout {
-      background-color: #ff4c4c;
-    }
-    .button:hover {
-      background-color: #45a049;
-    }
-    .pgp-container {
-      margin-top: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 150px;
-      margin-top: 10px;
-      resize: none;
-      font-family: monospace;
-    }
-  </style>
+          try {
+            const armoredKey = await file.text();
+            const privateKey = await openpgp.readPrivateKey({ armoredKey });
+            const decryptedKey = await openpgp.decryptKey({ privateKey, passphrase });
+
+            const encoder = new TextEncoder();
+            const rawKey = encoder.encode(decryptedKey.armor());
+
+            localAESKey = crypto.getRandomValues(new Uint8Array(32));
+            const cryptoKey = await crypto.subtle.importKey("raw", localAESKey, "AES-GCM", false, ["encrypt", "decrypt"]);
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+
+            const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, rawKey);
+
+            encryptedPrivateKey = { ciphertext, iv };
+            status.innerText = "✅ Private key decrypted and stored in-memory (10min)";
+
+            clearTimeout(keyTimeout);
+            keyTimeout = setTimeout(() => {
+              encryptedPrivateKey = null;
+              localAESKey = null;
+              status.innerText = "⏳ Private key expired. Please reload.";
+            }, 10 * 60 * 1000);
+
+          } catch (err) {
+            console.error(err);
+            alert("❌ Failed to decrypt private key.");
+          }
+        }
+
+        async function decryptMessage(armoredMessage) {
+          const status = document.getElementById("key-status");
+          if (!encryptedPrivateKey || !localAESKey) {
+            alert("❌ No active private key. Please upload again.");
+            return;
+          }
+
+          try {
+            const cryptoKey = await crypto.subtle.importKey("raw", localAESKey, "AES-GCM", false, ["decrypt"]);
+            const decryptedBytes = await crypto.subtle.decrypt({ name: "AES-GCM", iv: encryptedPrivateKey.iv }, cryptoKey, encryptedPrivateKey.ciphertext);
+
+            const decoder = new TextDecoder();
+            const privateKeyArmored = decoder.decode(decryptedBytes);
+            const privateKey = await openpgp.readPrivateKey({ armoredKey: privateKeyArmored });
+
+            const message = await openpgp.readMessage({ armoredMessage });
+            const { data: plaintext } = await openpgp.decrypt({ message, decryptionKeys: privateKey });
+
+            status.innerText = "📨 Decrypted message: " + plaintext;
+          } catch (err) {
+            console.error(err);
+            alert("❌ Failed to decrypt message.");
+          }
+        }
+
+        window.addEventListener("beforeunload", () => {
+          encryptedPrivateKey = null;
+          localAESKey = null;
+        });
+      </script>
+
+          <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+      }
+      .container {
+        text-align: center;
+        background-color: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+      }
+      .info {
+        background-color: #eef7ff;
+        padding: 20px;
+        border-left: 4px solid #007bff;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+      .pgp-info {
+        background-color: #f5f5f5;
+        color: #333;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+        font-size: 14px;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        overflow-x: auto;
+      }
+      .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+      .button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .button.logout {
+        background-color: #ff4c4c;
+      }
+      .button:hover {
+        background-color: #45a049;
+      }
+      .pgp-container {
+        margin-top: 20px;
+      }
+      textarea {
+        width: 100%;
+        height: 150px;
+        margin-top: 10px;
+        resize: none;
+        font-family: monospace;
+      }
+    </style>
+    </body>
+  </html>
 }
 
