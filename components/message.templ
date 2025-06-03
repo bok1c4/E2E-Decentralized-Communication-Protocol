@@ -3,11 +3,16 @@ package components
 import	"auth/db/models"
 
 
-templ Messages(msgs []models.MessageWithUser) {
+templ Messages(msgs []models.MessageWithUser, isDirect bool) {
     <div>
         for _, m := range msgs {
             <div>
-                <strong>{m.Username}</strong>: {m.Content}
+                <strong>{m.Username}</strong>:
+                if isDirect {
+                    <span class="pgp-message">{m.Content}</span>
+                } else {
+                    <span>{m.Content}</span>
+                }
                 <small>{m.CreatedAt.Format("15:04")}</small>
             </div>
         }

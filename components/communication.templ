@@ -4,8 +4,16 @@ import (
 	"fmt"
 )
 
-templ Communication(channelID uint) {
+templ Communication(channelID uint, isDirect bool, recipientPublicKey string) {
     <div>
+        if isDirect {
+            <script type="module" src="/static/js/decrypt-messages.js"></script>
+            <div id="pgp-channel-meta"
+                data-is-direct="true"
+                data-recipient-public-key={recipientPublicKey}>
+            </div>
+        }
+
         <form 
             action={templ.SafeURL("/channel/" + fmt.Sprint(channelID) + "/send")}
             method="POST"

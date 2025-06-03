@@ -52,3 +52,29 @@ func CreateChanBetweenTwoUsers(userID1, userID2 uint) (*models.Channel, error) {
 
 	return &channel, nil
 }
+
+func GetUsersInChannel(channelID uint) ([]models.User, error) {
+	var users []models.User
+
+	err := db.DB.
+		Joins("JOIN channel_users cu ON cu.user_id = users.id").
+		Where("cu.channel_id = ?", channelID).
+		Find(&users).Error
+
+	return users, err
+}
+
+func IsDirectChannel(chanID uint) (bool, error) {
+	var isDirect bool
+
+	err := db.DB.
+		Table("channels").
+		Select("is_direct").
+		Where("id = ?", chanID).
+		Scan(&isDirect).Error
+	if err != nil {
+		return false, err
+	}
+
+	return isDirect, nil
+}

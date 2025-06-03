@@ -53,7 +53,13 @@ func HandleGetMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	components.Messages(msgs).Render(r.Context(), w)
+	isDirect, err := repositories.IsDirectChannel(uint(channelID)) // implement this if not yet
+	if err != nil {
+		http.Error(w, "Failed to determine channel type", http.StatusInternalServerError)
+		return
+	}
+
+	components.Messages(msgs, isDirect).Render(r.Context(), w)
 }
 
 func HandleSendMessage(w http.ResponseWriter, r *http.Request) {
@@ -77,26 +83,36 @@ func HandleSendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content := r.FormValue("content")
-	err = services.CreateMessage(int(user.ID), int(channelID), content)
+	isDirect, err := repositories.IsDirectChannel(uint(channelID))
 	if err != nil {
-		http.Error(w, "Creating new Message has failed", http.StatusInternalServerError)
+		http.Error(w, "Failed to check channel type", http.StatusInternalServerError)
 		return
 	}
 
+	content := r.FormValue("content")
+
+	// store encrypted message as-is for direct channels
+	// for non-direct, we assume the message is plaintext
+	err = services.CreateMessage(int(user.ID), int(channelID), content)
+	if err != nil {
+		http.Error(w, "Creating new message failed", http.StatusInternalServerError)
+		return
+	}
+
+	// For UI, show encrypted blob if direct, otherwise plaintext
 	msg := models.MessageWithUser{
 		Username:  user.Username,
 		Content:   content,
 		CreatedAt: time.Now(),
 	}
-	components.Messages([]models.MessageWithUser{msg}).Render(r.Context(), w)
+
+	components.Messages([]models.MessageWithUser{msg}, isDirect).Render(r.Context(), w)
 }
 
 func ServeCommunication(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated := session.IsAuthenticated(r)
-	currentUser, _ := session.GetSessionValue(r, "username")
-
-	_, ok := currentUser.(string)
+	currentUserVal, _ := session.GetSessionValue(r, "username")
+	currentUser, ok := currentUserVal.(string)
 	if !ok {
 		http.Error(w, "Invalid session data", http.StatusInternalServerError)
 		return
@@ -109,11 +125,44 @@ func ServeCommunication(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isDirect, err := repositories.IsDirectChannel(uint(channelID))
+	if err != nil {
+		http.Error(w, "Failed to check channel type", http.StatusInternalServerError)
+		return
+	}
+
+	recipientPublicKey := ""
+
+	if isDirect {
+		// Get the other user in the direct channel
+		channelUsers, err := repositories.GetUsersInChannel(uint(channelID))
+		if err != nil || len(channelUsers) != 2 {
+			http.Error(w, "Could not get users for direct channel", http.StatusInternalServerError)
+			return
+		}
+
+		var recipient *models.User
+		for _, u := range channelUsers {
+			if u.Username != currentUser {
+				recipient = &u
+				break
+			}
+		}
+
+		if recipient == nil {
+			http.Error(w, "Recipient not found", http.StatusInternalServerError)
+			return
+		}
+
+		recipientPublicKey = recipient.PGPKey
+	}
+
 	page := components.Base(
 		"/chat",
 		isAuthenticated,
-		components.Communication(uint(channelID)),
+		components.Communication(uint(channelID), isDirect, recipientPublicKey),
 	)
+
 	templ.Handler(page).ServeHTTP(w, r)
 }
 
