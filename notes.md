@@ -16,30 +16,10 @@ You are the only one with access to your private key.
 If you lose your key or forget your passphrase, your messages cannot be recovered.
 This is a privacy feature — not even we can help you regain access
 
-Building Chat functionality:
-
-Show all of the users in the general channel
-Implement sending messages to the server and storing
-them in database.
-
 <http://securityheaders.com/>
 <https://developer.mozilla.org/en-US/observatory>
 
-Next steps:
+Implementing encryption.
 
-Adding private key decryption of messages
-Saving messages and retrieving messages from database (between users)
-Creating a group chat with encryption
-
-Messages should have row sent to, and that can be channel_id or user_id.
-
-First I should list channels and for user to pick which channel he wants to send the messages
-
-CHAT PAGE DATA needs to show online users, show channels.
-And when users click on the channel to redirect them to the
-SERVE_CHAT_PAGE (which handles both DIRECT and NON-DIRECT CHANNELS)
-
-I am going to create the channel when user clicks on the user, but later, the channel should only be created if the user sends the message
-
-For later, maybe have support route like /chat/{username} and then when the channel is created just to redirect to the channel page
-and if two users have the channel our application should avoid /chat/{username} route
+Private key should live encrypted in session key
+Passphrase for encrypted key also in session key

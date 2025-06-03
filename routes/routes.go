@@ -12,6 +12,9 @@ import (
 func Setup(r chi.Router) {
 	r.Use(middleware.SecurityHeaders)
 
+	fs := http.FileServer(http.Dir("static"))
+	r.Handle("/static/*", http.StripPrefix("/static/", fs))
+
 	r.Get("/", handlers.Home)
 
 	r.Group(func(r chi.Router) {
